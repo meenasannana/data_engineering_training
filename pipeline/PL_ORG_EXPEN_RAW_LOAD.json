@@ -1,0 +1,92 @@
+{
+	"name": "PL_ORG_EXPEN_RAW_LOAD",
+	"properties": {
+		"activities": [
+			{
+				"name": "timestamp",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "set_timestamp",
+					"value": {
+						"value": "@formatDateTime(utcNow(), 'yyyyMMddHHmmss')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Copy emp data",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "timestamp",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "AzureSqlTable1",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "raw",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "raw",
+							"entity": "emp",
+							"file_name": "emp_data.parquet"
+						}
+					}
+				]
+			}
+		],
+		"variables": {
+			"set_timestamp": {
+				"type": "String"
+			}
+		},
+		"annotations": []
+	}
+}
