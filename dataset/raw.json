@@ -29,7 +29,7 @@
 					"type": "Expression"
 				},
 				"folderPath": {
-					"value": "@concat('emp/',formatDateTime(utcNow(), 'yyyyMMddHHmmss'))",
+					"value": "@concat(dataset().entity,'/',formatDateTime(utcNow(), 'yyyyMMddHHmmss'))",
 					"type": "Expression"
 				},
 				"container": {
