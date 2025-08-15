@@ -5,6 +5,8 @@
 			{
 				"name": "timestamp",
 				"type": "SetVariable",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"secureOutput": false,
@@ -146,11 +148,38 @@
 						}
 					}
 				]
+			},
+			{
+				"name": "Rows Copied",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Copy dept data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "no_of_rows_copied",
+					"value": {
+						"value": "@activity('Copy dept data').output.rowsCopied",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"variables": {
 			"set_timestamp": {
 				"type": "String"
+			},
+			"no_of_rows_copied": {
+				"type": "Integer"
 			}
 		},
 		"annotations": []
