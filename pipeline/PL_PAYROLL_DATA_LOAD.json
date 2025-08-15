@@ -1,0 +1,94 @@
+{
+	"name": "PL_PAYROLL_DATA_LOAD",
+	"properties": {
+		"description": "pipelines ingest payroll data from source and load into raw container",
+		"activities": [
+			{
+				"name": "Copy  Payroll Data",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "select * from dbo.payroll",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "AzureSqlTable1",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "raw",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "raw",
+							"entity": "payroll",
+							"file_name": "payroll_data.parquet"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copied rows",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Copy  Payroll Data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "total_rows",
+					"value": {
+						"value": "@activity('Copy  Payroll Data').output.rowsCopied",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"total_rows": {
+				"type": "Integer"
+			}
+		},
+		"annotations": []
+	}
+}
